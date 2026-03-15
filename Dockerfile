@@ -12,6 +12,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/dist ./dist
-RUN bun i
+RUN bun install --omit dev
 EXPOSE 4000
 CMD ["node", "dist/server.js"]

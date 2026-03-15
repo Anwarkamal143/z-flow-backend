@@ -1,0 +1,1 @@
+ALTER TABLE "executions" ALTER COLUMN "completed_at" DROP DEFAULT;

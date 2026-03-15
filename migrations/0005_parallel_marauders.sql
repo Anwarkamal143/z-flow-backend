@@ -1,0 +1,1 @@
+ALTER TABLE "connections" DROP CONSTRAINT "connections_unique_fromOutput_toInput_idx";

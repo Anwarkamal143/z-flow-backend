@@ -1,0 +1,1 @@
+ALTER TABLE "executions" ALTER COLUMN "name" DROP NOT NULL;

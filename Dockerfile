@@ -1,5 +1,5 @@
 FROM node:20-alpine AS builder
-RUN apt-get update && apt-get install -y postgresql-client
+RUN apk add --no-cache postgresql-client
 WORKDIR /app
 RUN npm i -g bun
 COPY package.json bun.lock ./

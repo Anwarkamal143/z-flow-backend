@@ -45,16 +45,16 @@ export interface SearchConfig<T extends ITableSelectType> {
 }
 
 // Pagination base config
-export interface BasePaginationConfig<T extends ITableSelectType> {
-  filters?: FilterCondition<T>[];
-  search?: SearchConfig<T>;
-  sorts?: SortConfig<T>[];
+export interface BasePaginationConfig<T extends Table> {
+  filters?: FilterCondition<InferSelectModel<T>>[];
+  search?: SearchConfig<InferSelectModel<T>>;
+  sorts?: SortConfig<InferSelectModel<T>>[];
   includeTotal?: boolean;
 }
 
 // Offset pagination config
 export interface OffsetPaginationConfig<
-  T extends ITableSelectType,
+  T extends Table,
 > extends BasePaginationConfig<T> {
   page: number;
   limit?: number | null;
@@ -62,19 +62,18 @@ export interface OffsetPaginationConfig<
 
 // Cursor pagination config
 export interface CursorPaginationConfig<
-  T extends ITableSelectType,
+  T extends Table,
 > extends BasePaginationConfig<T> {
   cursor?: string | null;
   limit?: number | null;
-  cursorColumn: keyof T;
+  cursorColumn: keyof InferSelectModel<T>;
   cursorDirection?: "forward" | "backward";
 }
-export type PaginationsConfig<T extends ITableSelectType> =
-  BasePaginationConfig<T> &
-    (
-      | (CursorPaginationConfig<T> & { mode: "cursor" })
-      | (OffsetPaginationConfig<T> & { mode: "offset" })
-    );
+export type PaginationsConfig<T extends Table> = BasePaginationConfig<T> &
+  (
+    | (CursorPaginationConfig<T> & { mode: "cursor" })
+    | (OffsetPaginationConfig<T> & { mode: "offset" })
+  );
 export type IPaginationMeta = {
   isFirst?: boolean;
   isLast?: boolean;

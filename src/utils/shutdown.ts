@@ -34,7 +34,7 @@ function handleUncaughtErrors(fastify: FastifyInstance) {
     process.exit(1); // Exit to avoid unknown state
   });
 
-  process.on("unhandledRejection", (reason, promise) => {
+  process.on("unhandledRejection", (reason) => {
     fastify.log.error("❌ Unhandled Rejection at:" + reason);
     process.exit(1); // Exit to avoid unknown state
   });

@@ -117,9 +117,9 @@ export class BaseService<
       cursorColumn?: (t: TTable) => AnyColumn;
       where?: (t: TTable) => SQL<unknown> | undefined;
     };
-    OffsetPaginationConfig: OffsetPaginationConfig<TSelect>;
-    CursorPaginationConfig: CursorPaginationConfig<TSelect>;
-    PaginationsConfig: PaginationsConfig<TSelect>;
+    OffsetPaginationConfig: OffsetPaginationConfig<TTable>;
+    CursorPaginationConfig: CursorPaginationConfig<TTable>;
+    PaginationsConfig: PaginationsConfig<TTable>;
     column: ColumnKey<TSelect> | ColumnSelector<TSelect>;
   };
 
@@ -576,7 +576,7 @@ export class BaseService<
     }
   }
 
-  async paginationOffsetRecords(props: OffsetPaginationConfig<TSelect>) {
+  async paginationOffsetRecords(props: OffsetPaginationConfig<TTable>) {
     const parseResult = this.validateOffsetPagination(props);
     if (parseResult.error) {
       return parseResult;
@@ -584,7 +584,7 @@ export class BaseService<
     const result = await paginateOffset(db, this.table, parseResult.data);
     return result;
   }
-  async paginationCursorRecords(props: CursorPaginationConfig<TSelect>) {
+  async paginationCursorRecords(props: CursorPaginationConfig<TTable>) {
     const parseResult = this.validateCursorPagination(props);
     if (parseResult.error) {
       return parseResult;
@@ -676,7 +676,7 @@ export class BaseService<
     return paginationCursorMeta.prepareCursorQueryMeta(parseResult.data);
   }
 
-  validateCursorPagination(props: CursorPaginationConfig<TSelect>) {
+  validateCursorPagination(props: CursorPaginationConfig<TTable>) {
     const includeTotal = coerceIncludeTotal(props.includeTotal);
     const limit = parseLimit(props.limit);
     const config = cursorPaginationConfigSchema.safeParse({
@@ -703,7 +703,7 @@ export class BaseService<
       error: null,
     };
   }
-  validateOffsetPagination(params: OffsetPaginationConfig<TSelect>) {
+  validateOffsetPagination(params: OffsetPaginationConfig<TTable>) {
     const includeTotal = coerceIncludeTotal(params.includeTotal);
     const limit = parseLimit(params.limit);
     const config = offsetPaginationConfigSchema.safeParse({

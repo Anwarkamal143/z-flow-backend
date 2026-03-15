@@ -32,7 +32,7 @@ export async function paginateOffset<
 >(
   db: DBType,
   table: T,
-  config: OffsetPaginationConfig<InferSelectModel<T>>,
+  config: OffsetPaginationConfig<T>,
 ): Promise<OffsetPaginationResult<Result>> {
   const pagination = PaginationFactory.createOffsetPagination(db, table);
   return pagination.paginate<Result>(config);
@@ -44,7 +44,7 @@ export async function paginateCursor<
 >(
   db: DBType,
   table: T,
-  config: CursorPaginationConfig<InferSelectModel<T>>,
+  config: CursorPaginationConfig<T>,
 ): Promise<CursorPaginationResult<Result>> {
   const pagination = PaginationFactory.createCursorPagination(db, table);
   return pagination.paginate<Result>(config);

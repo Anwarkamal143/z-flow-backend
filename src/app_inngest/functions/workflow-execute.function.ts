@@ -15,7 +15,7 @@ export default inngest.createFunction(
     id: "execute-workflow",
     retries: ENVIRONMENTS.isProduction ? 3 : 0,
 
-    onFailure: async ({ event, step, error }) => {
+    onFailure: async ({ event, error }) => {
       const inngestEventId = event.data.event.id;
       console.log("Workflow execution failed", {
         error: error.message,

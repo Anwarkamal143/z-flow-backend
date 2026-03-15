@@ -1,5 +1,5 @@
 import { publishEvent } from "@/app_inngest/channels/manual-trigger";
-import { NodeExecutor, NodeExecutorParams } from "@/flow-executions/types";
+import { NodeExecutor } from "@/flow-executions/types";
 
 type ManualTriggerData = Record<string, unknown>;
 export const manualTriggerExecutor: NodeExecutor<ManualTriggerData> = async (

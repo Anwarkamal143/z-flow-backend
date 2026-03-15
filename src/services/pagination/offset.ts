@@ -7,7 +7,7 @@ import { OffsetPaginationConfig, OffsetPaginationResult } from "./types";
 
 export class OffsetPagination<T extends AnyPgTable> extends BasePagination<T> {
   async paginate<Result = InferSelectModel<T>>(
-    config: OffsetPaginationConfig<InferSelectModel<T>>,
+    config: OffsetPaginationConfig<T>,
   ): Promise<OffsetPaginationResult<Result>> {
     const result = this.prepareOffsetQueryMeta(config);
 
@@ -34,9 +34,7 @@ export class OffsetPagination<T extends AnyPgTable> extends BasePagination<T> {
   /**
    * Prepare filters, order by, and pagination metadata before executing query
    */
-  public prepareOffsetQueryMeta(
-    config: OffsetPaginationConfig<InferSelectModel<T>>,
-  ) {
+  public prepareOffsetQueryMeta(config: OffsetPaginationConfig<T>) {
     const whereClause = this.builder.buildWhereClause(
       config.filters,
       config.search,
@@ -53,7 +51,7 @@ export class OffsetPagination<T extends AnyPgTable> extends BasePagination<T> {
    * After query execution, get total count if requested and build response
    */
   public async getOffsetResultWithTotalCountIfNeeded(
-    config: OffsetPaginationConfig<InferSelectModel<T>>,
+    config: OffsetPaginationConfig<T>,
     whereClause: any,
     items: any[],
     limitNum: number | undefined | null,

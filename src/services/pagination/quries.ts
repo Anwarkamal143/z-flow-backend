@@ -4,10 +4,11 @@ import { stringToNumber } from "@/utils";
 import { getTableColumns } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
 import { paginateCursor, paginateOffset } from ".";
-import { IPaginationModes } from "../base.service";
+
 import {
   CursorPaginationConfig,
   cursorPaginationConfigSchema,
+  IPaginationType,
   OffsetPaginationConfig,
   offsetPaginationConfigSchema,
   PaginationsConfig,
@@ -31,7 +32,7 @@ export class PaginationQuries<TTable extends PgTable> {
   }
 
   validatePagination<T = any>(
-    props: PaginationsConfig<UnionIfBPresent<TTable, T>>
+    props: PaginationsConfig<UnionIfBPresent<TTable, T>>,
   ): PaginationsConfig<UnionIfBPresent<TTable, T>> {
     if (props.mode == "cursor") {
       return this.validateCursorPagination(props) as PaginationsConfig<
@@ -41,7 +42,7 @@ export class PaginationQuries<TTable extends PgTable> {
       };
     }
     return this.validateOffsetPagination(
-      props as OffsetPaginationConfig<TTable>
+      props as OffsetPaginationConfig<TTable>,
     ) as PaginationsConfig<UnionIfBPresent<TTable, T>> & {
       mode: "offset";
     };
@@ -57,18 +58,18 @@ export class PaginationQuries<TTable extends PgTable> {
       page: stringToNumber(params.page) || 1,
       limit: stringToNumber(params.limit),
       filters: this.validateFilterColumnsColumns(
-        this.parseIfExistAndString(params.filters)
+        this.parseIfExistAndString(params.filters),
       ),
       search: this.validateSearchColumnsColumns(
-        this.parseIfExistAndString(params.search)
+        this.parseIfExistAndString(params.search),
       ),
       sorts: this.validateFilterColumnsColumns(
-        this.parseIfExistAndString(params.sorts)
+        this.parseIfExistAndString(params.sorts),
       ),
       includeTotal: params.includeTotal,
     });
 
-    return { ...config, mode: "offset" as IPaginationModes };
+    return { ...config, mode: "offset" as IPaginationType };
   }
   validateCursorPagination(props: CursorPaginationConfig<TTable>) {
     console.log(props, "validateCursorPagination", typeof props.includeTotal);
@@ -85,20 +86,20 @@ export class PaginationQuries<TTable extends PgTable> {
         "id") as keyof TTable["$inferSelect"],
       cursorDirection: (props.cursorDirection as string) || "forward",
       filters: this.validateFilterColumnsColumns(
-        this.parseIfExistAndString(props.filters)
+        this.parseIfExistAndString(props.filters),
       ),
       search: this.validateSearchColumnsColumns(
-        this.parseIfExistAndString(props.search)
+        this.parseIfExistAndString(props.search),
       ),
       sorts: this.validateFilterColumnsColumns(
-        this.parseIfExistAndString(props.sorts)
+        this.parseIfExistAndString(props.sorts),
       ),
       includeTotal: props.includeTotal,
     });
     return { ...config, mode: "cursor" };
   }
   validateFilterColumnsColumns<T extends { column: string }>(
-    columns?: T[]
+    columns?: T[],
   ): T[] | undefined {
     if (columns == null) {
       return undefined;
@@ -108,7 +109,7 @@ export class PaginationQuries<TTable extends PgTable> {
     return columns?.filter((col) => tableColumns.includes(col.column));
   }
   validateSearchColumnsColumns<T extends { columns: string[] }>(
-    search?: T
+    search?: T,
   ): T | undefined {
     if (search == null || !search?.columns?.length) {
       return undefined;

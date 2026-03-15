@@ -8,7 +8,7 @@ import { CursorPaginationConfig, CursorPaginationResult } from "./types";
 
 export class CursorPagination<T extends AnyPgTable> extends BasePagination<T> {
   async paginate<Result = InferSelectModel<T>>(
-    config: CursorPaginationConfig<InferSelectModel<T>>,
+    config: CursorPaginationConfig<T>,
   ): Promise<CursorPaginationResult<Result>> {
     const result = this.prepareCursorQueryMeta(config);
 
@@ -40,11 +40,11 @@ export class CursorPagination<T extends AnyPgTable> extends BasePagination<T> {
    * Prepare Filters and orders by before execute query, this is common for both cursor and offset pagination
    */
 
-  public prepareCursorQueryMeta(
-    config: CursorPaginationConfig<InferSelectModel<T>>,
-  ) {
+  public prepareCursorQueryMeta(config: CursorPaginationConfig<T>) {
     // Validate cursor column
-    const validationError = this.validateCursorColumn(config.cursorColumn);
+    const validationError = this.validateCursorColumn(
+      config.cursorColumn as string,
+    );
     if (validationError?.error) {
       return validationError;
     }
@@ -71,7 +71,7 @@ export class CursorPagination<T extends AnyPgTable> extends BasePagination<T> {
    */
 
   public async getCursorResultWithTotalCountIfNeeded(
-    config: CursorPaginationConfig<InferSelectModel<T>>,
+    config: CursorPaginationConfig<T>,
 
     whereClause: any,
     cursorItems: any[],

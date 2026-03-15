@@ -1,5 +1,5 @@
 import { publishEvent } from "@/app_inngest/channels/manual-trigger";
-import { NodeExecutor, NodeExecutorParams } from "@/flow-executions/types";
+import { NodeExecutor } from "@/flow-executions/types";
 type StripeTriggerData = Record<string, unknown>;
 export const stripeTriggerExecutor: NodeExecutor<StripeTriggerData> = async (
   params,

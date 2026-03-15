@@ -98,7 +98,7 @@ export class RedisClient {
         rollingCountTimeout: 10000,
         rollingCountBuckets: 10,
         name: "redis-client",
-      }
+      },
     );
 
     this.setupCircuitBreakerEvents();
@@ -144,7 +144,7 @@ export class RedisClient {
 
         const delay = Math.min(times * 100, 3000);
         logger.warn(
-          `Retrying Redis connection in ${delay}ms (attempt ${times})`
+          `Retrying Redis connection in ${delay}ms (attempt ${times})`,
         );
         return delay;
       },
@@ -171,7 +171,7 @@ export class RedisClient {
     this._circuitBreaker.fallback((_err, args) => {
       logger.warn(
         "Using circuit breaker fallback for operation:",
-        args?.operation
+        args?.operation,
       );
       return args?.options?.fallback !== undefined
         ? args.options.fallback
@@ -308,12 +308,12 @@ export class RedisClient {
       };
 
       // Set timeout
-      const timeout = setTimeout(() => {
+      setTimeout(() => {
         cleanup();
         reject(
           new Error(
-            `Redis connection timeout (${this._config.connectTimeout}ms)`
-          )
+            `Redis connection timeout (${this._config.connectTimeout}ms)`,
+          ),
         );
       }, this._config.connectTimeout || 10000);
 
@@ -399,7 +399,7 @@ export class RedisClient {
   private async executeCommand<T>(
     operation: string,
     fn: (client: Redis | Cluster) => Promise<T>,
-    options: IRedisOperationOptions = {}
+    options: IRedisOperationOptions = {},
   ): Promise<T> {
     const startTime = Date.now();
     const timer = redisMetrics.latency.startTimer({ operation });
@@ -449,7 +449,7 @@ export class RedisClient {
   private async safeOperation<T extends unknown = null>(
     operation: string,
     fn: (client: Redis | Cluster) => Promise<T>,
-    options: IRedisOperationOptions = {}
+    options: IRedisOperationOptions = {},
   ): Promise<T> {
     try {
       if (options.circuitBreaker !== false) {
@@ -466,38 +466,38 @@ export class RedisClient {
   public async sadd(
     key: string,
     members: (string | number | Buffer<ArrayBufferLike>)[],
-    options: IRedisOperationOptions = {}
+    options: IRedisOperationOptions = {},
   ): Promise<number | null> {
     if (!key) return null;
     return await this.safeOperation(
       "sadd",
       async (client) => await client.sadd(key, ...members),
-      options
+      options,
     );
   }
 
   public async srem(
     key: string,
     members: (string | number | Buffer<ArrayBufferLike>)[],
-    options: IRedisOperationOptions = {}
+    options: IRedisOperationOptions = {},
   ): Promise<number | null> {
     if (!key) return null;
     return await this.safeOperation(
       "srem",
       async (client) => await client.srem(key, ...members),
-      { fallback: 0, ...options }
+      { fallback: 0, ...options },
     );
   }
 
   public async smembers(
     key: string,
-    options: IRedisOperationOptions = {}
+    options: IRedisOperationOptions = {},
   ): Promise<string[] | null> {
     if (!key) return null;
     return await this.safeOperation(
       "smembers",
       async (client) => await client.smembers(key),
-      { fallback: [], ...options }
+      { fallback: [], ...options },
     );
   }
 
@@ -505,7 +505,7 @@ export class RedisClient {
     key: string,
     value: any,
     ttl?: number,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<boolean> {
     if (!key) return false;
 
@@ -520,7 +520,7 @@ export class RedisClient {
         }
         return await client.set(key, valueToStore);
       },
-      options
+      options,
     );
     return result == "OK";
   }
@@ -528,7 +528,7 @@ export class RedisClient {
     key: string,
     value: any,
     ttl: number | null | undefined = null,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<boolean> {
     if (!key) return false;
 
@@ -543,14 +543,14 @@ export class RedisClient {
         }
         return await client.set(key, valueToStore, "NX");
       },
-      options
+      options,
     );
     return result == "OK";
   }
 
   public async get<T = any>(
     key: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<T | null> {
     if (!key) return null;
     const result = await this.getString(key, options);
@@ -565,19 +565,19 @@ export class RedisClient {
 
   public async getString(
     key: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<string | null> {
     if (!key) return null;
     return await this.safeOperation(
       "get",
       async (client) => await client.get(key),
-      options
+      options,
     );
   }
 
   public async del(
     key: string | string[],
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<number> {
     if (!key) return 0;
     const keys = Array.isArray(key) ? key : [key];
@@ -585,19 +585,19 @@ export class RedisClient {
     return await this.safeOperation<number>(
       "del",
       async (client) => client.del(keys),
-      options
+      options,
     );
   }
 
   public async mget<T = any>(
     keys: string[],
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<(T | null)[]> {
     if (!keys) return [];
     const results = await this.safeOperation<(string | null)[]>(
       "mget",
       async (client) => await client.mget(keys),
-      { fallback: [], ...options }
+      { fallback: [], ...options },
     );
 
     return results.map((result) => {
@@ -614,7 +614,7 @@ export class RedisClient {
     key: string,
     seconds: number,
     value: any,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<boolean> {
     if (!key) return false;
     return this.set(key, value, seconds, options);
@@ -623,51 +623,51 @@ export class RedisClient {
   public async expire(
     key: string,
     seconds: number,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<boolean> {
     if (!key) return false;
     const result = await this.safeOperation<number>(
       "expire",
       async (client) => await client.expire(key, seconds),
-      options
+      options,
     );
     return result === 1;
   }
 
   public async exists(
     key: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<boolean> {
     if (!key) return false;
     const result = await this.safeOperation<number>(
       "exists",
       async (client) => await client.exists(key),
-      options
+      options,
     );
     return result === 1;
   }
 
   public async incr(
     key: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<number> {
     if (!key) return 0;
     return await this.safeOperation<number>(
       "incr",
       async (client) => await client.incr(key),
-      { fallback: 0, ...options }
+      { fallback: 0, ...options },
     );
   }
 
   public async decr(
     key: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<number> {
     if (!key) return 0;
     return await this.safeOperation(
       "decr",
       async (client) => await client.decr(key),
-      { fallback: 0, ...options }
+      { fallback: 0, ...options },
     );
   }
 
@@ -675,7 +675,7 @@ export class RedisClient {
     key: string,
     field: string,
     value: any,
-    options: IRedisOperationOptions = {}
+    options: IRedisOperationOptions = {},
   ): Promise<number> {
     if (!key) return 0;
 
@@ -685,20 +685,20 @@ export class RedisClient {
     return await this.safeOperation<number>(
       "hset",
       async (client) => await client.hset(key, field, valueToStore),
-      { fallback: 0, ...options }
+      { fallback: 0, ...options },
     );
   }
 
   public async hget<T = any>(
     key: string,
     field: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<T | null> {
     if (!key) return null;
     const result = await this.safeOperation<string | null>(
       "hget",
       async (client) => await client.hget(key, field),
-      options
+      options,
     );
 
     if (!result) return null;
@@ -721,13 +721,13 @@ export class RedisClient {
 
   public async hgetall<T = any>(
     key: string,
-    options?: IRedisOperationOptions
+    options?: IRedisOperationOptions,
   ): Promise<Record<string, T> | null> {
     if (!key) return null;
     const result = await this.safeOperation(
       "hgetall",
       async (client) => await client.hgetall(key),
-      options
+      options,
     );
 
     if (!result) return null;
@@ -756,18 +756,18 @@ export class RedisClient {
       typeof message == "string"
         ? message
         : typeof message == "number"
-        ? `${message}`
-        : JSON.stringify(message || {});
+          ? `${message}`
+          : JSON.stringify(message || {});
     return await this.safeOperation<number>(
       "publish",
       async (client) => await client.publish(channel, messageToSend),
-      { fallback: 0, ...options }
+      { fallback: 0, ...options },
     );
   };
 
   public async subscribe(
     channel: string,
-    callback: (message: string, channel: string) => void
+    callback: (message: string, channel: string) => void,
   ): Promise<void> {
     if (!channel) return;
     if (!this.client) throw new Error("Redis client not connected");
@@ -788,7 +788,7 @@ export class RedisClient {
   }
   public async removeStream(
     pattern: string,
-    batchSize = 500
+    batchSize = 500,
   ): Promise<boolean> {
     if (!pattern) return false;
     let deleted = 0;
@@ -856,7 +856,7 @@ export class RedisClient {
   public async scan(
     cursor: string,
     pattern?: string,
-    count: number = 500
+    count: number = 500,
   ): Promise<[string, string[]] | null> {
     if (!pattern) return null;
     const key = createRedisKey(pattern);
@@ -965,7 +965,7 @@ export class RedisClient {
     }
     const result = await this.safeOperation<string>(
       "flushdb",
-      async (client) => await client.flushdb()
+      async (client) => await client.flushdb(),
     );
     return result === "OK";
   }

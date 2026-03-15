@@ -4,8 +4,8 @@ import { createOpenAI } from "@ai-sdk/openai"; // Correct import
 import { generateText } from "ai"; // From Vercel AI SDK
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
-import { NodeExecutor, NodeExecutorParams } from "../types";
 import { runStepWithCatch } from "../run-with-catch";
+import { NodeExecutor } from "../types";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -20,15 +20,7 @@ type OpenaiExecutor = {
 };
 
 export const openaiExecutor: NodeExecutor<OpenaiExecutor> = async (params) => {
-  const {
-    data,
-    nodeId,
-    workflowId,
-    context,
-    step,
-    userId,
-    publish,
-  } = params;
+  const { data, nodeId, workflowId, context, step, userId, publish } = params;
   const baseEvent = {
     nodeId,
     jobId: nodeId,
@@ -125,39 +117,41 @@ export const openaiExecutor: NodeExecutor<OpenaiExecutor> = async (params) => {
 
     /* ---------------- Template Resolution ---------------- */
     const { resolvedUserPrompt, resolvedSystemPrompt } = await step.run(
-    `Openai-template-${nodeId}`,
-    async () => {
-      try {
-        const resolvedUserPrompt = Handlebars.compile(userPrompt)(context);
+      `Openai-template-${nodeId}`,
+      async () => {
+        try {
+          const resolvedUserPrompt = Handlebars.compile(userPrompt)(context);
 
-        if (!resolvedUserPrompt)
-          throw new Error("Openai node: userPrompt resolved to empty string");
+          if (!resolvedUserPrompt)
+            throw new Error("Openai node: userPrompt resolved to empty string");
 
-        const resolvedSystemPrompt = systemPrompt
-          ? Handlebars.compile(systemPrompt)(context)
-          : "You are a helpful assistant.";
+          const resolvedSystemPrompt = systemPrompt
+            ? Handlebars.compile(systemPrompt)(context)
+            : "You are a helpful assistant.";
 
-        if (!resolvedSystemPrompt)
-          throw new Error("Openai node: systemPrompt resolved to empty string");
+          if (!resolvedSystemPrompt)
+            throw new Error(
+              "Openai node: systemPrompt resolved to empty string",
+            );
 
-        return { resolvedUserPrompt, resolvedSystemPrompt };
-      } catch {
-        await publishEvent({
-          publish,
-          event: {
-            ...baseEvent,
-            step: "templating",
-            status: "error",
-            error: "Openai node: Failed to resolve prompt templates",
-          },
-        });
+          return { resolvedUserPrompt, resolvedSystemPrompt };
+        } catch {
+          await publishEvent({
+            publish,
+            event: {
+              ...baseEvent,
+              step: "templating",
+              status: "error",
+              error: "Openai node: Failed to resolve prompt templates",
+            },
+          });
 
-        throw new NonRetriableError(
-          "Openai node: Failed to resolve prompt templates",
-        );
-      }
-    },
-  );
+          throw new NonRetriableError(
+            "Openai node: Failed to resolve prompt templates",
+          );
+        }
+      },
+    );
 
     /* ---------------- AI Execution ---------------- */
     const openai = createOpenAI({

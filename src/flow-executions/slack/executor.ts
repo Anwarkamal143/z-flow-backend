@@ -3,8 +3,8 @@ import axios from "axios";
 import Handlebars from "handlebars";
 import { decode } from "html-entities";
 import { NonRetriableError } from "inngest";
-import { NodeExecutor, NodeExecutorParams } from "../types";
 import { runStepWithCatch } from "../run-with-catch";
+import { NodeExecutor } from "../types";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -29,7 +29,12 @@ export const slackExecutor: NodeExecutor<SlackExecutor> = async (params) => {
   const publishError = async (error: Error) => {
     await publishEvent({
       publish,
-      event: { ...baseEvent, step: "executor", status: "error", error: error.message },
+      event: {
+        ...baseEvent,
+        step: "executor",
+        status: "error",
+        error: error.message,
+      },
     });
   };
 
@@ -69,80 +74,80 @@ export const slackExecutor: NodeExecutor<SlackExecutor> = async (params) => {
     /* ---------------- Template Resolution ---------------- */
     const { resolvedContent, resolvedWebhookUrl, resolvedUserName } =
       await step.run(`slack-template-${nodeId}`, async () => {
-      try {
-        const rawContent = Handlebars.compile(content)(context);
+        try {
+          const rawContent = Handlebars.compile(content)(context);
 
-        const resolvedContent = decode(rawContent);
+          const resolvedContent = decode(rawContent);
 
-        if (!resolvedContent)
-          throw new Error("Slack node: content resolved to empty string");
+          if (!resolvedContent)
+            throw new Error("Slack node: content resolved to empty string");
 
-        const resolvedWebhookUrl = webhookUrl;
-        Handlebars.compile(webhookUrl)(context);
+          const resolvedWebhookUrl = webhookUrl;
+          Handlebars.compile(webhookUrl)(context);
 
-        if (!resolvedWebhookUrl)
-          throw new Error("Slack node: Webhook Url resolved to empty string");
+          if (!resolvedWebhookUrl)
+            throw new Error("Slack node: Webhook Url resolved to empty string");
 
-        const resolvedUserName = username
-          ? Handlebars.compile(username)(context)
-          : undefined;
+          const resolvedUserName = username
+            ? Handlebars.compile(username)(context)
+            : undefined;
 
-        if (username && !resolvedUserName)
-          throw new Error("Slack node: usename resolved to empty string");
+          if (username && !resolvedUserName)
+            throw new Error("Slack node: usename resolved to empty string");
 
-        return { resolvedContent, resolvedWebhookUrl, resolvedUserName };
-      } catch {
+          return { resolvedContent, resolvedWebhookUrl, resolvedUserName };
+        } catch {
+          await publishEvent({
+            publish,
+            event: {
+              ...baseEvent,
+              step: "templating",
+              status: "error",
+              error: "Slack node: Failed to resolve prompt templates",
+            },
+          });
+
+          throw new NonRetriableError(
+            "Slack node: Failed to resolve prompt templates",
+          );
+        }
+      });
+
+    const result = await step
+      .run(`slack-webhook-${nodeId}`, async () => {
+        const variableName = data.variableName;
+        const content =
+          resolvedContent.length > MAX_CONTENT_LENGTH
+            ? resolvedContent.slice(0, MAX_CONTENT_LENGTH - 3) + "..."
+            : resolvedContent;
+        const resp = await axios(resolvedWebhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: {
+            content,
+            username: resolvedUserName,
+          },
+        });
+
         await publishEvent({
           publish,
           event: {
             ...baseEvent,
-            step: "templating",
-            status: "error",
-            error: "Slack node: Failed to resolve prompt templates",
+            step: "processing",
+            status: "success",
+            data: resp.data,
           },
         });
 
-        throw new NonRetriableError(
-          "Slack node: Failed to resolve prompt templates",
-        );
-      }
-    });
-
-    const result = await step
-      .run(`slack-webhook-${nodeId}`, async () => {
-      const variableName = data.variableName;
-      const content =
-        resolvedContent.length > MAX_CONTENT_LENGTH
-          ? resolvedContent.slice(0, MAX_CONTENT_LENGTH - 3) + "..."
-          : resolvedContent;
-      const resp = await axios(resolvedWebhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: {
-          content,
-          username: resolvedUserName,
-        },
-      });
-
-      await publishEvent({
-        publish,
-        event: {
-          ...baseEvent,
-          step: "processing",
-          status: "success",
-          data: resp.data,
-        },
-      });
-
-      return {
-        ...context,
-        [variableName]: {
-          messageContent: content,
-        },
-      };
-    })
+        return {
+          ...context,
+          [variableName]: {
+            messageContent: content,
+          },
+        };
+      })
       .catch(async (e) => {
         await publishEvent({
           publish,

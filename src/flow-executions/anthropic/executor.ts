@@ -4,8 +4,8 @@ import { createAnthropic } from "@ai-sdk/anthropic"; // Correct import
 import { generateText } from "ai"; // From Vercel AI SDK
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
-import { NodeExecutor, NodeExecutorParams } from "../types";
 import { runStepWithCatch } from "../run-with-catch";
+import { NodeExecutor } from "../types";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -33,7 +33,12 @@ export const anthropicExecutor: NodeExecutor<AnthropicExecutor> = async (
   const publishError = async (error: Error) => {
     await publishEvent({
       publish,
-      event: { ...baseEvent, step: "executor", status: "error", error: error.message },
+      event: {
+        ...baseEvent,
+        step: "executor",
+        status: "error",
+        error: error.message,
+      },
     });
   };
 
@@ -68,9 +73,13 @@ export const anthropicExecutor: NodeExecutor<AnthropicExecutor> = async (
         if (!userId?.trim())
           throw new NonRetriableError("Anthropic node: UserId is missing");
         if (!credentialId?.trim())
-          throw new NonRetriableError("Anthropic node: Credentials are missing");
+          throw new NonRetriableError(
+            "Anthropic node: Credentials are missing",
+          );
         if (!variableName?.trim())
-          throw new NonRetriableError("Anthropic node: Variable name is missing");
+          throw new NonRetriableError(
+            "Anthropic node: Variable name is missing",
+          );
         if (!userPrompt?.trim())
           throw new NonRetriableError("Anthropic node: User prompt is missing");
       },
@@ -108,43 +117,43 @@ export const anthropicExecutor: NodeExecutor<AnthropicExecutor> = async (
 
     /* ---------------- Template Resolution ---------------- */
     const { resolvedUserPrompt, resolvedSystemPrompt } = await step.run(
-    `anthropic-template-${nodeId}`,
-    async () => {
-      try {
-        const resolvedUserPrompt = Handlebars.compile(userPrompt)(context);
+      `anthropic-template-${nodeId}`,
+      async () => {
+        try {
+          const resolvedUserPrompt = Handlebars.compile(userPrompt)(context);
 
-        if (!resolvedUserPrompt)
-          throw new Error(
-            "Anthropic node: userPrompt resolved to empty string",
+          if (!resolvedUserPrompt)
+            throw new Error(
+              "Anthropic node: userPrompt resolved to empty string",
+            );
+
+          const resolvedSystemPrompt = systemPrompt
+            ? Handlebars.compile(systemPrompt)(context)
+            : "You are a helpful assistant.";
+
+          if (!resolvedSystemPrompt)
+            throw new Error(
+              "Anthropic node: systemPrompt resolved to empty string",
+            );
+
+          return { resolvedUserPrompt, resolvedSystemPrompt };
+        } catch {
+          await publishEvent({
+            publish,
+            event: {
+              ...baseEvent,
+              step: "templating",
+              status: "error",
+              error: "Anthropic node: Failed to resolve prompt templates",
+            },
+          });
+
+          throw new NonRetriableError(
+            "Anthropic node: Failed to resolve prompt templates",
           );
-
-        const resolvedSystemPrompt = systemPrompt
-          ? Handlebars.compile(systemPrompt)(context)
-          : "You are a helpful assistant.";
-
-        if (!resolvedSystemPrompt)
-          throw new Error(
-            "Anthropic node: systemPrompt resolved to empty string",
-          );
-
-        return { resolvedUserPrompt, resolvedSystemPrompt };
-      } catch {
-        await publishEvent({
-          publish,
-          event: {
-            ...baseEvent,
-            step: "templating",
-            status: "error",
-            error: "Anthropic node: Failed to resolve prompt templates",
-          },
-        });
-
-        throw new NonRetriableError(
-          "Anthropic node: Failed to resolve prompt templates",
-        );
-      }
-    },
-  );
+        }
+      },
+    );
 
     /* ---------------- AI Execution ---------------- */
     const anthropic = createAnthropic({ apiKey: credential });

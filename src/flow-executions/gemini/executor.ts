@@ -4,8 +4,8 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google"; // Correct import
 import { generateText } from "ai"; // From Vercel AI SDK
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
-import { NodeExecutor, NodeExecutorParams } from "../types";
 import { runStepWithCatch } from "../run-with-catch";
+import { NodeExecutor } from "../types";
 
 Handlebars.registerHelper("json", (context) => {
   return new Handlebars.SafeString(JSON.stringify(context, null, 2));
@@ -31,7 +31,12 @@ export const geminiExecutor: NodeExecutor<GeminiExecutor> = async (params) => {
   const publishError = async (error: Error) => {
     await publishEvent({
       publish,
-      event: { ...baseEvent, step: "executor", status: "error", error: error.message },
+      event: {
+        ...baseEvent,
+        step: "executor",
+        status: "error",
+        error: error.message,
+      },
     });
   };
 
@@ -106,39 +111,41 @@ export const geminiExecutor: NodeExecutor<GeminiExecutor> = async (params) => {
 
     /* ---------------- Template Resolution ---------------- */
     const { resolvedUserPrompt, resolvedSystemPrompt } = await step.run(
-    `gemini-template-${nodeId}`,
-    async () => {
-      try {
-        const resolvedUserPrompt = Handlebars.compile(userPrompt)(context);
+      `gemini-template-${nodeId}`,
+      async () => {
+        try {
+          const resolvedUserPrompt = Handlebars.compile(userPrompt)(context);
 
-        if (!resolvedUserPrompt)
-          throw new Error("Gemini node: userPrompt resolved to empty string");
+          if (!resolvedUserPrompt)
+            throw new Error("Gemini node: userPrompt resolved to empty string");
 
-        const resolvedSystemPrompt = systemPrompt
-          ? Handlebars.compile(systemPrompt)(context)
-          : "You are a helpful assistant.";
+          const resolvedSystemPrompt = systemPrompt
+            ? Handlebars.compile(systemPrompt)(context)
+            : "You are a helpful assistant.";
 
-        if (!resolvedSystemPrompt)
-          throw new Error("Gemini node: systemPrompt resolved to empty string");
+          if (!resolvedSystemPrompt)
+            throw new Error(
+              "Gemini node: systemPrompt resolved to empty string",
+            );
 
-        return { resolvedUserPrompt, resolvedSystemPrompt };
-      } catch {
-        await publishEvent({
-          publish,
-          event: {
-            ...baseEvent,
-            step: "templating",
-            status: "error",
-            error: "Gemini node: Failed to resolve prompt templates",
-          },
-        });
+          return { resolvedUserPrompt, resolvedSystemPrompt };
+        } catch {
+          await publishEvent({
+            publish,
+            event: {
+              ...baseEvent,
+              step: "templating",
+              status: "error",
+              error: "Gemini node: Failed to resolve prompt templates",
+            },
+          });
 
-        throw new NonRetriableError(
-          "Gemini node: Failed to resolve prompt templates",
-        );
-      }
-    },
-  );
+          throw new NonRetriableError(
+            "Gemini node: Failed to resolve prompt templates",
+          );
+        }
+      },
+    );
 
     /* ---------------- AI Execution ---------------- */
     const google = createGoogleGenerativeAI({ apiKey: credential });

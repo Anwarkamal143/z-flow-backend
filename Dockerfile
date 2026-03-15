@@ -1,17 +1,25 @@
-FROM node:20-alpine AS builder
-RUN apk add --no-cache postgresql-client
+FROM oven/bun:1-alpine AS builder
+
 WORKDIR /app
-RUN npm i -g bun
-COPY package.json bun.lock ./
-RUN bun i
+
+COPY package.json bun.lockb ./
+RUN bun install
+
 COPY . .
+
 RUN bun run build
 
-FROM node:20-alpine
+
+FROM oven/bun:1-alpine
+
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/package.json /app/bun.lock ./
+
+COPY --from=builder /app/package.json /app/bun.lockb ./
 COPY --from=builder /app/dist ./dist
-RUN bun install --omit dev
+
+RUN bun install --production
+
 EXPOSE 4000
-CMD ["node", "dist/server.js"]
+
+CMD ["bun", "dist/server.js"]

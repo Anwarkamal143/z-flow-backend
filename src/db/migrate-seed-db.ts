@@ -16,7 +16,7 @@ export const runMigrations = async () => {
     console.info("🚀 migration path", path.join(__dirname, "..", "migrations"));
     // console.log(process.cwd());
     await migrate(migrationDb, {
-      migrationsFolder: path.join(__dirname, "migrations"),
+      migrationsFolder: path.join(__dirname, "..", "migrations"),
     });
     console.info("✅ Database migrations completed");
 

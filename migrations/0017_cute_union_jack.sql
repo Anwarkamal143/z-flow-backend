@@ -1,1 +1,0 @@
-CREATE TYPE "public"."execution_status" AS ENUM('RUNNING', 'SUCCESS', 'FAILED');

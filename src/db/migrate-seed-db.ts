@@ -13,7 +13,7 @@ export const runMigrations = async () => {
   try {
     console.info("🚀 Starting database migrations...");
     // console.log(process.cwd());
-    await migrate(migrationDb, { migrationsFolder: "migrations" });
+    await migrate(migrationDb, { migrationsFolder: "../migrations" });
     console.info("✅ Database migrations completed");
 
     console.info("🌱 Starting database seeding...");

@@ -1,6 +1,6 @@
 {
-  "id": "07df825e-8b16-4e0a-82a2-8c7a4ef95f6e",
-  "prevId": "901f9688-72fc-4019-890f-d44f0ce93348",
+  "id": "9fa006db-ad31-40e5-996c-a507af97be4d",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -487,8 +487,14 @@
           "name": "started_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "inngest_event_id": {
           "name": "inngest_event_id",
@@ -585,6 +591,14 @@
           "nullsNotDistinct": false,
           "columns": [
             "inngest_event_id"
+          ]
+        },
+        "execution_workflowId_startedAt_unique": {
+          "name": "execution_workflowId_startedAt_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "workflowId",
+            "started_at"
           ]
         }
       },

@@ -1,2 +1,0 @@
-ALTER TABLE "executions" DROP CONSTRAINT "workflow_started_unique";--> statement-breakpoint
-ALTER TABLE "executions" ADD CONSTRAINT "execution_workflowId_startedAt_unique" UNIQUE("workflowId","started_at");

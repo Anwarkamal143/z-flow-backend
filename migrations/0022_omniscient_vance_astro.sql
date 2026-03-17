@@ -1,1 +1,0 @@
-ALTER TABLE "executions" ADD CONSTRAINT "workflow_started_unique" UNIQUE("workflowId","started_at");

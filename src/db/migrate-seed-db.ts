@@ -22,7 +22,7 @@ export const runMigrations = async () => {
     console.info("🔌 Migration client disconnected");
     console.info("🎉 Database seeding completed");
   } catch (error: any) {
-    // logger.error('❌ Migration/seed failed', error);
+    console.error("❌ Migration/seed failed", error);
     process.exit(1);
   } finally {
     migrationClient.end().catch(() => {});

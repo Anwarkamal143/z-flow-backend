@@ -6,7 +6,8 @@ COPY package.json bun.lock ./
 RUN bun install
 
 COPY . .
-
+COPY inngest-entrypoint-dev.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN bun run build
 
 
@@ -21,5 +22,5 @@ COPY --from=builder /app/dist ./dist
 RUN bun install --production
 
 EXPOSE 4000
-
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["bun", "dist/index.js"]

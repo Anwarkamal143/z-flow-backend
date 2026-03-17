@@ -17,8 +17,7 @@ ENV NODE_ENV=production
 COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/dist ./dist
 
-# ✅ Copy migrations into dist
-COPY --from=builder /app/migrations ./dist/migrations
+
 
 # ✅ Entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

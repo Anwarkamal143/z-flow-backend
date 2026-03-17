@@ -22,4 +22,4 @@ RUN bun install --production
 
 EXPOSE 4000
 
-CMD ["bun", "dist/server.js"]
+CMD ["bun", "dist/index.js"]

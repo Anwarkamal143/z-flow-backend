@@ -6,7 +6,7 @@ set -e
 # ======================
 echo "🚀 Starting database migrations..."
 # bun run db-prod:migrate-with-seed
-bun run db-prod:migrate-with-seed
+bun  ./dist/db/migrate-seed-db.js
 echo "✅ Migrations completed successfully"
 
 # ======================

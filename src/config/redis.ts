@@ -136,6 +136,7 @@ export class RedisClient {
       enableReadyCheck: true,
       connectTimeout: 10000,
       lazyConnect: true,
+      tls: {},
       retryStrategy: (times) => {
         if (times > 10) {
           logger.error("Redis connection failed after 10 retries");

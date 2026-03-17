@@ -4,6 +4,7 @@ import postgres from "postgres";
 
 import { APP_CONFIG } from "@/config/app.config";
 // import { logger } from '@/utils/logger';
+import path from "path";
 import { seedDatabase } from "./seed";
 import * as schema from "./tables";
 
@@ -12,8 +13,11 @@ const migrationDb = drizzle(migrationClient, { schema });
 export const runMigrations = async () => {
   try {
     console.info("🚀 Starting database migrations...");
+    console.info("🚀 migration path", path.join(__dirname, "migrations"));
     // console.log(process.cwd());
-    await migrate(migrationDb, { migrationsFolder: "../migrations" });
+    await migrate(migrationDb, {
+      migrationsFolder: path.join(__dirname, "migrations"),
+    });
     console.info("✅ Database migrations completed");
 
     console.info("🌱 Starting database seeding...");

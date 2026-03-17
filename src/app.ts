@@ -39,12 +39,14 @@ const CORS_OPTIONS = {
 };
 export function buildApp() {
   const fastify = Fastify({
-    querystringParser: (str) =>
-      qs.parse(str, {
-        allowDots: true,
-        arrayLimit: 100,
-        depth: 10,
-      }),
+    routerOptions: {
+      querystringParser: (str) =>
+        qs.parse(str, {
+          allowDots: true,
+          arrayLimit: 100,
+          depth: 10,
+        }),
+    },
     logger: {
       level: process.env.NODE_ENV === "production" ? "info" : "debug",
       ...(!ENVIRONMENTS.isProduction

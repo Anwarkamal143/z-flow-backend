@@ -14,6 +14,7 @@ class UserController {
     const accessToken = request.cookies?.[APP_CONFIG.COOKIE_NAME];
     const refreshToken = request.cookies?.[APP_CONFIG.REFRESH_COOKIE_NAME];
     const { data } = await userService.getUserById(user?.id);
+    console.log("user data", accessToken, refreshToken, data);
     if (!data) {
       resetCookies(reply);
     }
@@ -28,7 +29,7 @@ class UserController {
    */
   public findById = async (
     req: FastifyRequest<{ Params: { userId: string } }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) => {
     const { userId: id } = req.params;
     if (!id) {
@@ -52,7 +53,7 @@ class UserController {
    */
   public findAll = async (
     req: FastifyRequest<{ Querystring: UsersPaginationConfig }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) => {
     const validationResult = userService.validateQuery(req.query, {
       search: "name",

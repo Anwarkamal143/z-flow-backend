@@ -13,7 +13,7 @@ export function parseExpiryDuration(duration: string): number {
 
   if (!match || !match[1] || !match[2]) {
     throw new Error(
-      `Invalid duration format: "${duration}". Use formats like "15m", "2h", "7d".`
+      `Invalid duration format: "${duration}". Use formats like "15m", "2h", "7d".`,
     );
   }
 
@@ -64,7 +64,7 @@ export const parseDurationToSeconds = (input: string | number): number => {
 
   if (!match || !match[1]) {
     throw new Error(
-      `Invalid duration format: "${input}". Try "15m", "2 hours", "1.5 days", "30s", etc.`
+      `Invalid duration format: "${input}". Try "15m", "2 hours", "1.5 days", "30s", etc.`,
     );
   }
 
@@ -125,7 +125,7 @@ export const getCookiesOptions = (props?: {
   const updatedCookies = { ...cookies };
   updatedCookies.expires = updatedCookies.expires || getCookieTime(expiresIn);
   updatedCookies.httpOnly = updatedCookies.httpOnly || true;
-  updatedCookies.sameSite = updatedCookies.sameSite || "lax";
+  updatedCookies.sameSite = updatedCookies.sameSite || "none";
   updatedCookies.path = updatedCookies.path || "/";
 
   if (process.env.NODE_ENV === "production") {
@@ -154,34 +154,32 @@ export const resetCookies = (res: FastifyReply) => {
 
 export const setCookies = async (
   res: FastifyReply,
-  tokenData: { id: string } & Record<string, any>
+  tokenData: { id: string } & Record<string, any>,
 ) => {
   // if (!tokenData?.id) {
   //   return null;
   // }
-  const { accessToken, cookieAttributes } = await generateAccessToken(
-    tokenData
-  );
+  const { accessToken, cookieAttributes } =
+    await generateAccessToken(tokenData);
   const { refreshToken, jti } = await generateRefreshToken(tokenData);
 
   res.cookie(APP_CONFIG.COOKIE_NAME, accessToken as string, cookieAttributes);
   res.cookie(
     APP_CONFIG.REFRESH_COOKIE_NAME,
     refreshToken as string,
-    cookieAttributes
+    cookieAttributes,
   );
   return { accessToken, refreshToken, jti };
 };
 export const setAccessTokenCookie = async (
   res: FastifyReply,
-  tokenData: { id: string } & Record<string, any>
+  tokenData: { id: string } & Record<string, any>,
 ) => {
   // if (!tokenData?.id) {
   //   return null;
   // }
-  const { accessToken, cookieAttributes } = await generateAccessToken(
-    tokenData
-  );
+  const { accessToken, cookieAttributes } =
+    await generateAccessToken(tokenData);
 
   res.cookie(APP_CONFIG.COOKIE_NAME, accessToken as string, cookieAttributes);
   return { accessToken };

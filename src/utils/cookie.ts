@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "@/config/app.config";
+import { APP_CONFIG, ENVIRONMENTS } from "@/config/app.config";
 import { FastifyReply } from "fastify";
 import { generateAccessToken, generateRefreshToken } from "./jwt";
 
@@ -125,10 +125,11 @@ export const getCookiesOptions = (props?: {
   const updatedCookies = { ...cookies };
   updatedCookies.expires = updatedCookies.expires || getCookieTime(expiresIn);
   updatedCookies.httpOnly = updatedCookies.httpOnly || true;
-  updatedCookies.sameSite = updatedCookies.sameSite || "none";
+  updatedCookies.sameSite =
+    updatedCookies.sameSite || ENVIRONMENTS.isProduction ? "none" : "lax";
   updatedCookies.path = updatedCookies.path || "/";
 
-  if (process.env.NODE_ENV === "production") {
+  if (ENVIRONMENTS.isProduction) {
     updatedCookies.secure = true;
   }
 

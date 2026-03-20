@@ -243,14 +243,14 @@ export class RedisClient {
         await this.client.connect();
 
         // Wait for the 'ready' event
-        await this.waitForReady().catch((e) => {});
+        await this.waitForReady().catch((_e) => {});
       } else {
         // For lazyConnect: true, just wait for connection if already started
         if (
           this.client.status === "connecting" ||
           this.client.status === "connect"
         ) {
-          await this.waitForReady().catch((e) => {});
+          await this.waitForReady().catch((_e) => {});
         }
       }
 

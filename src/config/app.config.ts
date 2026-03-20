@@ -41,6 +41,7 @@ export const APP_CONFIG = {
   REFRESH_COOKIE_NAME: process.env.REFRESH_COOKIE_NAME || "refresh_x_jwt",
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
+  DOMAIN: process.env.DOMAIN || undefined,
   GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,

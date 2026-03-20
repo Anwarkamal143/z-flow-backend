@@ -126,12 +126,11 @@ export const getCookiesOptions = (props?: {
   updatedCookies.expires = updatedCookies.expires || getCookieTime(expiresIn);
   updatedCookies.httpOnly = updatedCookies.httpOnly || true;
   updatedCookies.sameSite =
-    updatedCookies.sameSite || ENVIRONMENTS.isProduction ? "none" : "lax";
+    updatedCookies.sameSite || (ENVIRONMENTS.isProduction ? "none" : "lax");
   updatedCookies.path = updatedCookies.path || "/";
+  updatedCookies.domain = APP_CONFIG.DOMAIN; 
 
-  if (ENVIRONMENTS.isProduction) {
-    updatedCookies.secure = true;
-  }
+  updatedCookies.secure = ENVIRONMENTS.isProduction;
 
   return updatedCookies;
 };

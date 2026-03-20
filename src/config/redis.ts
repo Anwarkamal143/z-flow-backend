@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "@/config/app.config";
+import { APP_CONFIG, ENVIRONMENTS } from "@/config/app.config";
 import { toUTC } from "@/utils/date-time";
 import { createRedisKey, replaceRedisPrefix } from "@/utils/redis";
 import { Cluster, Redis } from "ioredis";
@@ -136,7 +136,7 @@ export class RedisClient {
       enableReadyCheck: true,
       connectTimeout: 10000,
       lazyConnect: true,
-      // tls: {},
+      ...(ENVIRONMENTS.isProduction ? { tls: {} } : {}),
       retryStrategy: (times) => {
         if (times > 10) {
           logger.error("Redis connection failed after 10 retries");
@@ -227,7 +227,7 @@ export class RedisClient {
           enableReadyCheck: this._config.enableReadyCheck,
           connectTimeout: this._config.connectTimeout,
           lazyConnect: this._config.lazyConnect,
-          // tls: this._config.tls,
+          tls: this._config.tls,
           reconnectOnError: (err) => {
             const targetErrors = ["READONLY", "ETIMEDOUT", "ECONNREFUSED"];
             return targetErrors.some((target) => err.message.includes(target));

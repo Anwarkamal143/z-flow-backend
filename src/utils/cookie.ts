@@ -128,7 +128,9 @@ export const getCookiesOptions = (props?: {
   updatedCookies.sameSite =
     updatedCookies.sameSite || (ENVIRONMENTS.isProduction ? "none" : "lax");
   updatedCookies.path = updatedCookies.path || "/";
-  updatedCookies.domain = APP_CONFIG.DOMAIN; 
+  if (APP_CONFIG.DOMAIN || updatedCookies.domain) {
+    updatedCookies.domain = APP_CONFIG.DOMAIN;
+  }
 
   updatedCookies.secure = ENVIRONMENTS.isProduction;
 
